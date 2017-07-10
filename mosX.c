@@ -235,9 +235,9 @@ void update_all_but(GAMEPAD_DEVICE dev)
 void test_all_but_mos(GAMEPAD_DEVICE GAMEPAD_0)
 {
 	char ch;
-
-	puts("TEST all button update. Press q to continue test");
-	while((ch==getch())!='q'){
+	ch='0';
+	puts("TEST all button update. Press BACK to continue test");
+	while(ch!='1'){
 		update_all_but(GAMEPAD_0);
 		if(g_mos[BUTTON_X_define_mos]==TRUE)
 			puts("X-lore");
@@ -253,17 +253,19 @@ void test_all_but_mos(GAMEPAD_DEVICE GAMEPAD_0)
 			puts("right-stick-lore");
 		if(g_mos[BUTTON_START_define_mos]==TRUE)
 			puts("START-lore");
-		if(g_mos[BUTTON_BACK_define_mos]==TRUE)
+		if(g_mos[BUTTON_BACK_define_mos]==TRUE){
 			puts("BACK-lore");
+			ch='1';
+		}
 		if(g_mos[BUTTON_LB_define_mos]==TRUE)
 			puts("LB-lore");
 		if(g_mos[BUTTON_RB_define_mos]==TRUE)
 			puts("RB-lore");
 		g_mos_reset();
 	}
-
-	puts("TEST all single buttons update. Press q to exit test");
-	while((ch==getch())!='q'){
+	ch='0';
+	puts("TEST all single buttons update. Press START to exit test");
+	while(ch!='1'){
 		get_button_mos(GAMEPAD_0,"x");
 		get_button_mos(GAMEPAD_0,"y");
 		get_button_mos(GAMEPAD_0,"a");
@@ -286,8 +288,10 @@ void test_all_but_mos(GAMEPAD_DEVICE GAMEPAD_0)
 			puts("light-stick-lore");
 		if(g_mos[BUTTON_RIGHT_STICK_define_mos]==TRUE)
 			puts("right-stick-lore");
-		if(g_mos[BUTTON_START_define_mos]==TRUE)
+		if(g_mos[BUTTON_START_define_mos]==TRUE){
 			puts("START-lore");
+			ch='1';
+		}
 		if(g_mos[BUTTON_BACK_define_mos]==TRUE)
 			puts("BACK-lore");
 		if(g_mos[BUTTON_LB_define_mos]==TRUE)
