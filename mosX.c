@@ -15,7 +15,6 @@
 #define BUTTON_BACK_define_mos 7
 #define BUTTON_RIGHT_STICK_define_mos 8
 #define BUTTON_LEFT_STICK_define_mos 9
-
 // #define NUMBER_GAMEPAD_BUT 10 //old solution for for-loop
 enum gamepad_all_items {BUT_X, BUT_Y, BUT_A, BUT_B, BUT_RB, BUT_LB, BUT_START, BUT_BACK, BUT_RIGHT_STICK, BUT_LEFT_STICK, UNKNOWN };
 
@@ -39,25 +38,35 @@ struct gamepad_items
 	{"y",BUT_Y}
 };
 
+
 void get_button_mos(GAMEPAD_DEVICE dev,char const button_wanted[11]); //longest button name is left_stick
+void update_all_but(GAMEPAD_DEVICE dev);
+void test_all_but_mos(GAMEPAD_DEVICE GAMEPAD_0);
 void g_mos_reset();
+void init_gamepad_rogmos();
+
 
 void get_button_mos(GAMEPAD_DEVICE dev,char const button_wanted[6])
 {
-	static bool new_bool,old_bool=FALSE,first_run=TRUE;
-	static char old_button[6];
+	static bool new_bool,old_bool[10],first_run=TRUE;
+	//static char old_button[6];
 	int chosen_but;
+	unsigned long int i;
 
 	GamepadUpdate();
 	if(first_run==TRUE)
 	{
-		strcpy(old_button, button_wanted);
+		//strcpy(old_button, button_wanted);
 		first_run=FALSE;
+		for(i=0;i<10;i++)
+		{
+			old_bool[i]=FALSE;
+		}
 	}
 	move(dev, 0);
 	//need to save ult button so new and old bool function can work
 
-	unsigned long int i;
+
 	enum gamepad_all_items my_gamepad_items;
 	struct gamepad_items *choice = NULL;
 	//puts("hallo");
@@ -121,37 +130,210 @@ void get_button_mos(GAMEPAD_DEVICE dev,char const button_wanted[6])
 			break;
 	}
 
-	if(strcmp(old_button,button_wanted)==0)	//old_bool is right
+
+//	printf("\nold:%d\nnew%d\n",old_bool,new_bool);
+	if(old_bool[chosen_but]==TRUE&&new_bool==TRUE)
 	{
-		puts("gleich");
-		//old_bool=FALSE;
-		printf("\nold:%d\nnew%d\n",old_bool,new_bool);
-		if(old_bool==TRUE&&new_bool==TRUE)
-		{
-			g_mos[chosen_but]=FALSE;		
-		}
-		else if(old_bool==FALSE&&new_bool==TRUE)
-		{
-			g_mos[chosen_but]=TRUE;
-		}
-		else
-		{
-			g_mos[chosen_but]=FALSE;
-		}
+		g_mos[chosen_but]=FALSE;		
 	}
-	else	//old bool is wrong
+	else if(old_bool[chosen_but]==FALSE&&new_bool==TRUE)
 	{
-		g_mos[chosen_but]=new_bool;
+		g_mos[chosen_but]=TRUE;
+	}
+	else
+	{
+		g_mos[chosen_but]=FALSE;
 	}
 
 
-	old_bool=new_bool;
-	strcpy(old_button, button_wanted);
+	old_bool[chosen_but]=new_bool;
+}
+
+void update_all_but(GAMEPAD_DEVICE dev)
+{
+	static bool new_bool,old_bool[10],first_run=TRUE;
+	//static char old_button[6];
+	int chosen_but,i;
+
+	GamepadUpdate();
+	if(first_run==TRUE)
+	{
+		//strcpy(old_button, button_wanted);
+		first_run=FALSE;
+		for(i=0;i<sizeof gamepad_but_list/sizeof (struct gamepad_items);i++)
+		{
+			old_bool[i]=FALSE;
+		}
+	}
+	move(dev, 0);
+		for(i=0;i<sizeof gamepad_but_list/sizeof (struct gamepad_items);i++)
+		{
+			switch(i)	//da muasd nu alles ausfüllen
+			{
+				case BUTTON_RB_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_RIGHT_SHOULDER);
+					chosen_but=BUTTON_RB_define_mos;
+					break;
+				case BUTTON_LB_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_LEFT_SHOULDER);
+					chosen_but=BUTTON_LB_define_mos;
+					break;
+				case BUTTON_START_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_START);
+					chosen_but=BUTTON_START_define_mos;
+					break;
+				case BUTTON_BACK_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_BACK);
+					chosen_but=BUTTON_BACK_define_mos;
+					break;
+				case BUTTON_A_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_A);
+					chosen_but=BUTTON_A_define_mos;
+					break;
+				case BUTTON_B_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_B);
+					chosen_but=BUTTON_B_define_mos;
+					break;
+				case BUTTON_Y_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_Y);
+					chosen_but=BUTTON_Y_define_mos;
+					break;
+				case BUTTON_X_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_X);
+					chosen_but=BUTTON_X_define_mos;
+					break;
+				case BUTTON_LEFT_STICK_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_LEFT_THUMB);
+					chosen_but=BUTTON_LEFT_STICK_define_mos;
+					break;
+				case BUTTON_RIGHT_STICK_define_mos:
+					new_bool=GamepadButtonDown(dev, BUTTON_RIGHT_THUMB);
+					chosen_but=BUTTON_RIGHT_STICK_define_mos;
+					break;
+				default:
+					puts("Die Russen kommen");
+					break;
+			}
+
+			if(old_bool[chosen_but]==TRUE&&new_bool==TRUE)
+			{
+				g_mos[chosen_but]=FALSE;		
+			}
+			else if(old_bool[chosen_but]==FALSE&&new_bool==TRUE)
+			{
+				g_mos[chosen_but]=TRUE;
+			}
+			else
+			{
+				g_mos[chosen_but]=FALSE;
+			}
+			old_bool[chosen_but]=new_bool;
+	}
+
+}
+
+void test_all_but_mos(GAMEPAD_DEVICE GAMEPAD_0)
+{
+	char ch;
+
+	puts("TEST all button update. Press q to continue test");
+	while((ch==getch())!='q'){
+		update_all_but(GAMEPAD_0);
+		if(g_mos[BUTTON_X_define_mos]==TRUE)
+			puts("X-lore");
+		if(g_mos[BUTTON_Y_define_mos]==TRUE)
+			puts("Y-lore");
+		if(g_mos[BUTTON_A_define_mos]==TRUE)
+			puts("A-lore");
+		if(g_mos[BUTTON_B_define_mos]==TRUE)
+			puts("B-lore");
+		if(g_mos[BUTTON_LEFT_STICK_define_mos]==TRUE)
+			puts("light-stick-lore");
+		if(g_mos[BUTTON_RIGHT_STICK_define_mos]==TRUE)
+			puts("right-stick-lore");
+		if(g_mos[BUTTON_START_define_mos]==TRUE)
+			puts("START-lore");
+		if(g_mos[BUTTON_BACK_define_mos]==TRUE)
+			puts("BACK-lore");
+		if(g_mos[BUTTON_LB_define_mos]==TRUE)
+			puts("LB-lore");
+		if(g_mos[BUTTON_RB_define_mos]==TRUE)
+			puts("RB-lore");
+		g_mos_reset();
+	}
+
+	puts("TEST all single buttons update. Press q to exit test");
+	while((ch==getch())!='q'){
+		get_button_mos(GAMEPAD_0,"x");
+		get_button_mos(GAMEPAD_0,"y");
+		get_button_mos(GAMEPAD_0,"a");
+		get_button_mos(GAMEPAD_0,"b");
+		get_button_mos(GAMEPAD_0,"left_stick");
+		get_button_mos(GAMEPAD_0,"right_stick");
+		get_button_mos(GAMEPAD_0,"start");
+		get_button_mos(GAMEPAD_0,"back");
+		get_button_mos(GAMEPAD_0,"rb");
+		get_button_mos(GAMEPAD_0,"lb");
+		if(g_mos[BUTTON_X_define_mos]==TRUE)
+			puts("X-lore");
+		if(g_mos[BUTTON_Y_define_mos]==TRUE)
+			puts("Y-lore");
+		if(g_mos[BUTTON_A_define_mos]==TRUE)
+			puts("A-lore");
+		if(g_mos[BUTTON_B_define_mos]==TRUE)
+			puts("B-lore");
+		if(g_mos[BUTTON_LEFT_STICK_define_mos]==TRUE)
+			puts("light-stick-lore");
+		if(g_mos[BUTTON_RIGHT_STICK_define_mos]==TRUE)
+			puts("right-stick-lore");
+		if(g_mos[BUTTON_START_define_mos]==TRUE)
+			puts("START-lore");
+		if(g_mos[BUTTON_BACK_define_mos]==TRUE)
+			puts("BACK-lore");
+		if(g_mos[BUTTON_LB_define_mos]==TRUE)
+			puts("LB-lore");
+		if(g_mos[BUTTON_RB_define_mos]==TRUE)
+			puts("RB-lore");
+		g_mos_reset();
+	}
+
 }
 
 void g_mos_reset(){
 	int i;
-	for(i=0;i<10;i++)
+	for(i=0;i<sizeof gamepad_but_list/sizeof (struct gamepad_items);i++)
 		g_mos[i]=FALSE;
+}
+
+void init_gamepad_rogmos()
+{
+	cbreak();
+    timeout(1);
+    GamepadInit();
+
+}
+
+int main(){
+	char ch;
+
+	init_gamepad_rogmos();
+
+	test_all_but_mos(GAMEPAD_0);
+/*
+	while((ch==getch())!='q'){
+		get_button_mos(GAMEPAD_0,"left_stick");
+		get_button_mos(GAMEPAD_0,"y");
+		get_button_mos(GAMEPAD_0,"x");
+		update_all_but(GAMEPAD_0);
+		if(g_mos[BUTTON_X_define_mos]==TRUE)
+			puts("X-lore");
+		if(g_mos[BUTTON_Y_define_mos]==TRUE)
+			puts("Y-lore");
+		if(g_mos[BUTTON_LEFT_STICK_define_mos]==TRUE)
+			puts("light stick lore");
+		g_mos_reset();
+	}*/
+
+	return 0;
 }
 
